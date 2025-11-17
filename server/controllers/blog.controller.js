@@ -1,5 +1,7 @@
 import fs from 'fs';
 import { imagekit } from '../config/imageKit.js';
+import Blog from '../models/blog.model.js';
+import Comment from '../models/comment.model.js';
 
 export const addBlog = async(req, res) =>{
     try {
@@ -35,7 +37,7 @@ export const addBlog = async(req, res) =>{
         await Blog.create({
             title,
             subTitle,
-            descrition,
+            description,
             category,
             image,
             isPublished
@@ -50,6 +52,127 @@ export const addBlog = async(req, res) =>{
         return res.json({
             success: false,
             message: error.message,
+        }); 
+    }
+}
+
+
+export const getAllBlogs = async(req,res) =>{
+    try {
+        const blogs = await Blog.find({isPublished: true});
+        return res.json({
+            success: true,
+            blogs,
+        });
+    } catch (error) {
+         return res.json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
+export const getBlogById = async(req,res) =>{
+    try {
+        const { blogId } = req.params;
+        const blog = await Blog.findById(blogId);
+
+        if(!blog){
+            return res.json({
+                success: false,
+                message: "Blog not found"
+            });
+        }
+
+        return res.json({
+            success: true,
+            blog,
+        });
+
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
+export const deleteBlogById = async(req,res) =>{
+    try {
+        const { id } = req.body;
+       await Blog.findByIdAndDelete(id);
+
+       await Comment.deleteMany({ blog: id});
+
+        return res.json({
+            success: true,
+            message:"Blog deleted!"
+        });
+
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
+export const togglePublish = async(req,res) =>{
+    try {
+        const {id} = req.body;
+        const blog = await Blog.findById(id);
+
+        blog.isPublished = !blog.isPublished;
+        await blog.save();
+
+        return res.json({
+            success: true,
+            message:"Blog status updated!"
+        });
+
+    } catch (error) {
+        return res.json({
+            success: true,
+            message: error.message 
+        });
+    }
+}
+
+export const addComment = async(req,res) =>{
+    try {
+        const {blog, name, content} = req.body;
+        await Comment.create({
+            blog,
+            name,
+            content,
+        });
+
+        return res.json({
+            success: true,
+            message: "Comment added for review"
+        });
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
+export const getBlogComments = async (req,res) =>{
+    try {
+        const {blogId} = req.body;
+
+        const comments = (await Comment.find({blog: blogId, isApproved: true})).toSorted({createdAt : -1});
+        return res.json({
+            success: true,
+            comments
+        });
+
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: error.message
         });
     }
 }
