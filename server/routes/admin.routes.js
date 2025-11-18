@@ -7,11 +7,11 @@ import auth from '../middlewares/auth.js';
 const router = Router();
 
 router.post("/login", adminLogin);
-router.post("/comments", auth, getAllComments);
-router.post("/blogs", auth, getAllBlogs);
+router.get("/comments", auth, getAllComments);
+router.get("/blogs", auth, getAllBlogs);
 router.post("/delete-comment", auth, deleteCommentById);
 router.post("/approve-comment", auth, approvedCommentById);
-router.post("/dashboard", auth, getDashboard);
+router.get("/dashboard", auth, getDashboard);
 
 
 

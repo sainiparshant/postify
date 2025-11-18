@@ -161,9 +161,9 @@ export const addComment = async(req,res) =>{
 
 export const getBlogComments = async (req,res) =>{
     try {
-        const {blogId} = req.body;
+        const { blogId } = req.body;
 
-        const comments = (await Comment.find({blog: blogId, isApproved: true})).toSorted({createdAt : -1});
+        const comments = await Comment.find({blog: blogId, isApproved: true}).sort({createdAt : -1});
         return res.json({
             success: true,
             comments
